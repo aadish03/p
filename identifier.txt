@@ -1,0 +1,17 @@
+// flex iden.l (isme niche wala code dalo)
+// gcc -0 iden lex.yy.c -ll
+// ./iden
+
+%{
+#include <stdio.h>
+%}
+%%
+^[a-zA-Z_][a-zA-Z0-9_]* { printf("Valid Identifier\n"); }
+^[^a-zA-Z_] { printf("Invalid Identifier\n"); }
+[ \t\n]+ { /* Ignore whitespace */ }
+. { /* Ignore other invalid characters */ }
+%%
+int main() {
+ yylex(); /* Start the lexer */
+ return 0;
+}
