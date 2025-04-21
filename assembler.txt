@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_LABELS 100
+#define MAX_LINE 100
+
+typedef struct {
+    char label[20];
+    int address;
+} Symbol;
+
+Symbol symtab[MAX_LABELS];
+int symcount = 0;
+int locctr = 0;
+
+typedef struct {
+    char mnemonic[10];
+    char opcode[10];
+} Opcode;
+
+Opcode optab[] = {
+    {"MOV", "01"},
+    {"ADD", "02"},
+    {"SUB", "03"},
+    {"JMP", "04"},
+    {"", ""}
+};
+
+void add_symbol(char *label, int address) {
+    int i;
+    for (i = 0; i < symcount; i++) {
+        if (strcmp(symtab[i].label, label) == 0)
+            return; // already exists
+    }
+    strcpy(symtab[symcount].label, label);
+    symtab[symcount].address = address;
+    symcount++;
+}
+
+char* get_opcode(char *mnemonic) {
+    int i;
+    for (i = 0; optab[i].mnemonic[0] != '\0'; i++) {
+        if (strcmp(optab[i].mnemonic, mnemonic) == 0)
+            return optab[i].opcode;
+    }
+    return "";
+}
+
+int get_symbol_address(char *label) {
+    int i;
+    for (i = 0; i < symcount; i++) {
+        if (strcmp(symtab[i].label, label) == 0)
+            return symtab[i].address;
+    }
+    return -1;
+}
+
+void assemble(FILE *input, FILE *output) {
+    char line[MAX_LINE];
+    char label[20], instr[20], op1[20], op2[20];
+
+    while (fgets(line, sizeof(line), input)) {
+        label[0] = instr[0] = op1[0] = op2[0] = '\0';
+
+        // Check if line contains a label
+        if (strchr(line, ':')) {
+            sscanf(line, "%[^:]: %s %[^,],%s", label, instr, op1, op2);
+            add_symbol(label, locctr);
+        } else {
+            int n = sscanf(line, "%s %[^,],%s", instr, op1, op2);
+            if (n == 1 && get_opcode(instr)[0] == '\0') {
+                // Handle label without colon
+                strcpy(label, instr);
+                add_symbol(label, locctr);
+                continue;
+            }
+        }
+
+        if (instr[0]) {
+            char *opcode = get_opcode(instr);
+            if (opcode[0]) {
+                fprintf(output, "%04X: %s", locctr, opcode);
+                if (op1[0]) {
+                    fprintf(output, " %s", op1);
+                    if (op2[0]) {
+                        fprintf(output, ",%s", op2);
+                    }
+                }
+                fprintf(output, "\n");
+                locctr++;
+            }
+        }
+    }
+}
+
+void print_symbol_table() {
+    int i;
+    printf("\nSymbol Table:\n");
+    for (i = 0; i < symcount; i++) {
+        printf("%s => %04X\n", symtab[i].label, symtab[i].address);
+    }
+}
+
+int main() {
+    FILE *input = fopen("input.asm", "r");
+    FILE *output = fopen("output.obj", "w");
+
+    if (!input || !output) {
+        printf("Error opening files.\n");
+        return 1;
+    }
+
+    assemble(input, output);
+
+    fclose(input);
+    fclose(output);
+
+    print_symbol_table();
+
+    return 0;
+}
+//input
+START   MOV A,B
+        ADD A,C
+LOOP:   SUB A,D
+        JMP LOOP
+END
+
+//output
+0000: 01 A,B
+0001: 02 A,C
+0002: 03 A,D
+0003: 04 LOOP
+Symbol Table:
+LOOP => 0002
