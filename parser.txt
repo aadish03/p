@@ -1,106 +1,106 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
 
 #define MAX 100
 
-// Stack for Shift-Reduce Parsing
 char stack[MAX];
 int top = -1;
 
-// Function to push elements to the stack
-void push(char c)
-{
-    if (top < MAX - 1)
-    {
+void push(char c) {
+    if (top < MAX - 1) {
         stack[++top] = c;
     }
 }
 
-// Function to pop elements from the stack
-char pop()
-{
-    if (top >= 0)
-    {
+char pop() {
+    if (top >= 0) {
         return stack[top--];
     }
     return '\0';
 }
 
-// Function to perform Shift-Reduce Parsing
-void shiftReduceParser(char input[])
-{
+int str_len(char str[]) {
     int i = 0;
-    int length = strlen(input);
+    while (str[i] != '\0') i++;
+    return i;
+}
 
-    // Start parsing
+void shiftReduceParser(char input[]) {
+    int i = 0;
+    int length = str_len(input);
+
     printf("Input: %s\n", input);
-    while (i < length)
-    {
+    while (i < length) {
+        // Display current stack and remaining input
         printf("Stack: ");
-        for (int j = 0; j <= top; j++)
-        {
-            printf("%c", stack[j]);
-        }
+        for (int j = 0; j <= top; j++) printf("%c", stack[j]);
         printf(", Input: ");
-        for (int j = i; j < length; j++)
-        {
-            printf("%c", input[j]);
-        }
+        for (int j = i; j < length; j++) printf("%c", input[j]);
         printf("\n");
 
-        // Perform Shift operation
+        // Shift
         push(input[i]);
         i++;
 
-        // Perform Reduce if possible
-        // Check for the pattern "aSb" and reduce it to "S"
-        if (top >= 2 && stack[top] == 'b' && stack[top - 1] == 'S' && stack[top - 2] == 'a')
-        {
-            pop(); // b
-            pop(); // S
-            pop(); // a
-            push('S');
+        // Reduce aSb -> S
+        if (top >= 2 && stack[top] == 'b' && stack[top - 1] == 'S' && stack[top - 2] == 'a') {
+            pop(); pop(); pop(); push('S');
             printf("Reduced to S\n");
         }
 
-        // Check for base case "ab" and reduce to "S"
-        if (top >= 1 && stack[top] == 'b' && stack[top - 1] == 'a')
-        {
-            pop(); // b
-            pop(); // a
-            push('S');
+        // Reduce ab -> S (base case)
+        if (top >= 1 && stack[top] == 'b' && stack[top - 1] == 'a') {
+            pop(); pop(); push('S');
             printf("Reduced to S (base case)\n");
         }
     }
 
-    // Final Output
+    // Final Stack
     printf("Stack: ");
-    for (int j = 0; j <= top; j++)
-    {
-        printf("%c", stack[j]);
-    }
+    for (int j = 0; j <= top; j++) printf("%c", stack[j]);
     printf("\n");
 
     if (top == 0 && stack[top] == 'S')
-    {
         printf("Input string is accepted (parsed successfully).\n");
-    }
     else
-    {
         printf("Input string is rejected.\n");
-    }
 }
 
-int main()
-{
+int main() {
     char input[MAX];
-
     printf("Enter a string to parse (only 'a' and 'b' allowed): ");
     scanf("%s", input);
-
-    // Call the Shift-Reduce parser
     shiftReduceParser(input);
-
     return 0;
 }
+
+
+Sure! For the shift-reduce parser that reduces:
+
+ab → S (base case)
+
+aSb → S (recursive case)
+
+You can try the following sample strings that should be accepted:
+
+✅ Accepted Strings:
+ab
+→ ab → S
+
+aabbb
+→ ab → S, then aSb → S
+
+aaabbbb
+→ ab → S → aSb → S → aSb → S
+
+aababb
+→ ab → S, ab → S, aSb → S
+
+❌ Rejected Strings (invalid grammar):
+aab
+→ No valid reduction to single S
+
+abb
+→ ab → S, leftover b remains
+
+baab
+→ Starts with b, no rule for that
