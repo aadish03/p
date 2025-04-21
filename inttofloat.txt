@@ -1,0 +1,19 @@
+// flex iden.l (isme niche wala code dalo)
+// gcc -0 iden lex.yy.c -ll
+// ./iden
+
+%{
+#include <stdio.h>
+%}
+%%
+[0-9]+ { printf("Integer: %s\n", yytext); }
+[0-9]+\.[0-9]+ { printf("Floating Point: %s\n", yytext); }
+[0-9]*\.[0-9]+ { printf("Floating Point: %s\n", yytext);}
+. {printf("Invalid input:%s\n",yytext); }
+%%
+int main()
+{
+ printf("Enter a number (integer or floating-point): ");
+ yylex(); // Start lexical analysis
+ return 0;
+}
