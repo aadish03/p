@@ -136,3 +136,13 @@ END
 0001: 02 A,C
 0002: 03 A,D
 0003: 04 LOOP
+
+
+Assembler is a program for converting instructions written in low-level assembly code into relocatable machine code and generating along information for the loader. It is necessary to convert user-written programs into machinery code. This is called a translation of a high-level language to a low-level that is machinery language. This type of translation is performed with the help of system software. An Assembler can be defined as a program that translates an assembly language program into a machine language program. Self-assembler is a program that runs on a computer and produces the machine codes for the same computer or same machine.
+
+The assembler generates instructions by evaluating the mnemonics (symbols) in the operation field and finding the value of symbols and literals to produce machine code. On the basis of this functionality, assembler has two types:
+Single-Pass Assembler: If an assembler does all this work in one scan then it is called a single-pass assembler.
+Multiple-Pass Assembler: If it does it in multiple scans then called a multiple-pass assembler.
+
+A one-pass assembler is a type of assembler that reads the source code in a single pass to produce the object code. Unlike its multi-pass counterparts, it doesn't revisit the source code. This means it has to resolve addresses, labels, and instructions on the fly without any second chances.
+To achieve this, it uses techniques such as forward referencing and temporary storage to handle unresolved symbols and generate machine code on the fly.

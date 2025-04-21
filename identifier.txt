@@ -15,3 +15,18 @@ int main() {
  yylex(); /* Start the lexer */
  return 0;
 }
+Lex is a tool or a computer program that generates Lexical Analyzers (converts the stream of characters into tokens). The Lex tool itself is a compiler. The Lex compiler takes the input and transforms that input into input patterns. It is commonly used with YACC(Yet Another Compiler Compiler). It was written by Mike Lesk and Eric Schmidt.
+
+Function of Lex
+1. In the first step the source code which is in the Lex language having the file name ‘File.l’ gives as input to the Lex Compiler commonly known as Lex to get the output as lex.yy.c.
+
+2. After that, the output lex.yy.c will be used as input to the C compiler which gives the output in the form of an ‘a.out’ file, and finally, the output file a.out will take the stream of character and generates tokens as output.
+
+Lex File Format
+A Lex program consists of three parts and is separated by % delimiters:-
+
+Declarations
+%%
+Translation rules
+%%
+Auxiliary procedures
