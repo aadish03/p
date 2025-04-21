@@ -1,96 +1,66 @@
 #include <stdio.h>
-#include <string.h>
 
 #define MAX_LABELS 100
 #define MAX_LINE 100
 
-typedef struct {
+struct Symbol {
     char label[20];
     int address;
-} Symbol;
+};
 
-Symbol symtab[MAX_LABELS];
+struct Symbol symtab[MAX_LABELS];
 int symcount = 0;
 int locctr = 0;
 
-typedef struct {
-    char mnemonic[10];
-    char opcode[10];
-} Opcode;
+const char *mnemonics[] = {"MOV", "ADD", "SUB", "JMP"};
+const char *opcodes[]   = {"01",  "02",  "03",  "04"};
+int opcode_count = 4;
 
-Opcode optab[] = {
-    {"MOV", "01"},
-    {"ADD", "02"},
-    {"SUB", "03"},
-    {"JMP", "04"},
-    {"", ""}
-};
-
-void add_symbol(char *label, int address) {
-    int i;
-    for (i = 0; i < symcount; i++) {
-        if (strcmp(symtab[i].label, label) == 0)
-            return; // already exists
+int str_eq(const char *a, const char *b) {
+    int i = 0;
+    while (a[i] && b[i]) {
+        if (a[i] != b[i]) return 0;
+        i++;
     }
-    strcpy(symtab[symcount].label, label);
-    symtab[symcount].address = address;
-    symcount++;
+    return a[i] == b[i];
 }
 
-char* get_opcode(char *mnemonic) {
-    int i;
-    for (i = 0; optab[i].mnemonic[0] != '\0'; i++) {
-        if (strcmp(optab[i].mnemonic, mnemonic) == 0)
-            return optab[i].opcode;
-    }
-    return "";
+void str_copy(char *dst, const char *src) {
+    int i = 0;
+    while ((dst[i] = src[i])) i++;
 }
 
-int get_symbol_address(char *label) {
-    int i;
-    for (i = 0; i < symcount; i++) {
-        if (strcmp(symtab[i].label, label) == 0)
-            return symtab[i].address;
+int find_char(const char *str, char ch) {
+    int i = 0;
+    while (str[i]) {
+        if (str[i] == ch) return i;
+        i++;
     }
     return -1;
 }
 
-void assemble(FILE *input, FILE *output) {
-    char line[MAX_LINE];
-    char label[20], instr[20], op1[20], op2[20];
-
-    while (fgets(line, sizeof(line), input)) {
-        label[0] = instr[0] = op1[0] = op2[0] = '\0';
-
-        // Check if line contains a label
-        if (strchr(line, ':')) {
-            sscanf(line, "%[^:]: %s %[^,],%s", label, instr, op1, op2);
-            add_symbol(label, locctr);
-        } else {
-            int n = sscanf(line, "%s %[^,],%s", instr, op1, op2);
-            if (n == 1 && get_opcode(instr)[0] == '\0') {
-                // Handle label without colon
-                strcpy(label, instr);
-                add_symbol(label, locctr);
-                continue;
-            }
-        }
-
-        if (instr[0]) {
-            char *opcode = get_opcode(instr);
-            if (opcode[0]) {
-                fprintf(output, "%04X: %s", locctr, opcode);
-                if (op1[0]) {
-                    fprintf(output, " %s", op1);
-                    if (op2[0]) {
-                        fprintf(output, ",%s", op2);
-                    }
-                }
-                fprintf(output, "\n");
-                locctr++;
-            }
-        }
+const char* get_opcode(const char *mnemonic) {
+    int i, j;
+    for (i = 0; i < opcode_count; i++) {
+        j = 0;
+        while (mnemonic[j] && mnemonics[i][j] && mnemonic[j] == mnemonics[i][j]) j++;
+        if (mnemonic[j] == '\0' && mnemonics[i][j] == '\0') return opcodes[i];
     }
+    return "";
+}
+
+void add_symbol(const char *label, int address) {
+    int i = 0, j = 0;
+    for (i = 0; i < symcount; i++) {
+        j = 0;
+        while (label[j] && symtab[i].label[j] && label[j] == symtab[i].label[j]) j++;
+        if (label[j] == '\0' && symtab[i].label[j] == '\0') return;
+    }
+
+    j = 0;
+    while ((symtab[symcount].label[j] = label[j])) j++;
+    symtab[symcount].address = address;
+    symcount++;
 }
 
 void print_symbol_table() {
@@ -102,34 +72,67 @@ void print_symbol_table() {
 }
 
 int main() {
-    FILE *input = fopen("input.asm", "r");
-    FILE *output = fopen("output.obj", "w");
+    char line[MAX_LINE];
+    char label[20], instr[20], op1[20], op2[20];
+    int i, p;
 
-    if (!input || !output) {
-        printf("Error opening files.\n");
-        return 1;
+    printf("Enter assembly code (Ctrl+D to stop):\n");
+
+    while (fgets(line, MAX_LINE, stdin)) {
+        i = 0; p = 0;
+        label[0] = instr[0] = op1[0] = op2[0] = '\0';
+
+        while (line[i] != '\0') {
+            if (line[i] == '\n') { line[i] = '\0'; break; }
+            i++;
+        }
+
+        int colon_pos = find_char(line, ':');
+        if (colon_pos != -1) {
+            for (i = 0; i < colon_pos && i < 19; i++)
+                label[i] = line[i];
+            label[i] = '\0';
+            add_symbol(label, locctr);
+            p = colon_pos + 1;
+        }
+
+        i = 0;
+        while (line[p] == ' ') p++;
+        while (line[p] != ' ' && line[p] != '\0') instr[i++] = line[p++];
+        instr[i] = '\0';
+
+        while (line[p] == ' ') p++;
+        i = 0;
+        while (line[p] != ',' && line[p] != ' ' && line[p] != '\0') op1[i++] = line[p++];
+        op1[i] = '\0';
+
+        if (line[p] == ',') p++;
+        while (line[p] == ' ') p++;
+        i = 0;
+        while (line[p] != ' ' && line[p] != '\0') op2[i++] = line[p++];
+        op2[i] = '\0';
+
+        const char *opcode = get_opcode(instr);
+        if (opcode[0]) {
+            printf("%04X: %s", locctr, opcode);
+            if (op1[0]) printf(" %s", op1);
+            if (op2[0]) printf(",%s", op2);
+            printf("\n");
+            locctr++;
+        }
     }
 
-    assemble(input, output);
-
-    fclose(input);
-    fclose(output);
-
     print_symbol_table();
-
     return 0;
 }
-//input
+
 START   MOV A,B
         ADD A,C
 LOOP:   SUB A,D
         JMP LOOP
 END
 
-//output
 0000: 01 A,B
 0001: 02 A,C
 0002: 03 A,D
 0003: 04 LOOP
-Symbol Table:
-LOOP => 0002
