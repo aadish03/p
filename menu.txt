@@ -1,0 +1,8 @@
+assembler
+char-count 
+identifier 
+inttofloat
+leftrecursion
+lexical
+parser
+word-count
