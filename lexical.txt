@@ -1,63 +1,84 @@
 #include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
 
-#define MAX_TOKEN_LENGTH 100
 #define MAX_CODE_LENGTH 1000
+#define MAX_TOKEN_LENGTH 100
 
-typedef enum {
-    KEYWORD,
-    IDENTIFIER,
-    NUMBER,
-    SYMBOL,
-    OPERATOR,
-    WHITESPACE,
-    UNKNOWN
-} TokenType;
-
+// Define keywords manually
 const char *keywords[] = {"if", "else", "while", "for", "return", "int", "float", "char"};
-int num_keywords = sizeof(keywords) / sizeof(keywords[0]);
+int num_keywords = 8;
 
-int isKeyword(const char *str) {
+// Function to compare two strings
+int string_equals(const char *s1, const char *s2) {
+    int i = 0;
+    while (s1[i] != '\0' && s2[i] != '\0') {
+        if (s1[i] != s2[i]) return 0;
+        i++;
+    }
+    return s1[i] == s2[i];
+}
+
+// Check if a character is a letter
+int is_letter(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+// Check if a character is a digit
+int is_digit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+// Check if a string is a keyword
+int is_keyword(const char *str) {
     for (int i = 0; i < num_keywords; i++) {
-        if (strcmp(str, keywords[i]) == 0) {
+        int match = 1;
+        int j = 0;
+        while (keywords[i][j] != '\0' && str[j] != '\0') {
+            if (keywords[i][j] != str[j]) {
+                match = 0;
+                break;
+            }
+            j++;
+        }
+        if (match && keywords[i][j] == '\0' && str[j] == '\0') {
             return 1;
         }
     }
     return 0;
 }
 
+// Tokenize and print tokens
 void tokenize(const char *code) {
-    int i = 0, j = 0;
+    int i = 0;
     char token[MAX_TOKEN_LENGTH];
+    int j;
+
     printf("\nTokens identified:\n");
 
     while (code[i] != '\0') {
-        if (isspace(code[i])) {
+        // Skip whitespace
+        if (code[i] == ' ' || code[i] == '\n' || code[i] == '\t') {
             i++;
             continue;
         }
 
-        // Identifiers or Keywords
-        if (isalpha(code[i]) || code[i] == '_') {
+        // Identifier or Keyword
+        if (is_letter(code[i]) || code[i] == '_') {
             j = 0;
-            while (isalnum(code[i]) || code[i] == '_') {
+            while (is_letter(code[i]) || is_digit(code[i]) || code[i] == '_') {
                 token[j++] = code[i++];
             }
             token[j] = '\0';
-
-            if (isKeyword(token)) {
+            if (is_keyword(token)) {
                 printf("KEYWORD: %s\n", token);
             } else {
                 printf("IDENTIFIER: %s\n", token);
             }
         }
 
-        // Numbers
-        else if (isdigit(code[i])) {
+        // Number
+        else if (is_digit(code[i])) {
             j = 0;
-            while (isdigit(code[i]) || code[i] == '.') {
+            while (is_digit(code[i])) {
                 token[j++] = code[i++];
             }
             token[j] = '\0';
@@ -65,18 +86,20 @@ void tokenize(const char *code) {
         }
 
         // Symbols
-        else if (strchr("{}()[];,", code[i])) {
+        else if (code[i] == '{' || code[i] == '}' || code[i] == '(' || code[i] == ')' ||
+                 code[i] == '[' || code[i] == ']' || code[i] == ';' || code[i] == ',') {
             printf("SYMBOL: %c\n", code[i]);
             i++;
         }
 
         // Operators
-        else if (strchr("+-*/=<>!", code[i])) {
+        else if (code[i] == '+' || code[i] == '-' || code[i] == '*' || code[i] == '/' ||
+                 code[i] == '=' || code[i] == '<' || code[i] == '>' || code[i] == '!') {
             printf("OPERATOR: %c\n", code[i]);
             i++;
         }
 
-        // Unknown characters
+        // Unknown
         else {
             printf("UNKNOWN: %c\n", code[i]);
             i++;
@@ -86,28 +109,41 @@ void tokenize(const char *code) {
 
 int main() {
     char code[MAX_CODE_LENGTH];
+    char line[200];
 
     printf("Enter C code (end with a blank line):\n");
+    code[0] = '\0';
 
-    code[0] = '\0';  // Empty the code buffer
+    while (1) {
+        if (!fgets(line, sizeof(line), stdin)) break;
+        if (line[0] == '\n') break;
 
-    char line[256];
-    while (fgets(line, sizeof(line), stdin)) {
-        if (strcmp(line, "\n") == 0) {
-            break;  // blank line ends input
+        // Append line to code
+        int i = 0, j = 0;
+        while (code[i] != '\0') i++; // move to end of code
+        while (line[j] != '\0') {
+            code[i++] = line[j++];
         }
-        strcat(code, line);
+        code[i] = '\0'; // null terminate
     }
 
-    printf("Performing lexical analysis...\n");
+    printf("\nPerforming lexical analysis...\n");
     tokenize(code);
 
     return 0;
 }
-/*input
+
+/*sample input 
 int main() {
     int x = 10;
-    float y = 20.5;
-    if (x < y) return x;
+    if (x > 5) return x;
 }
 */
+
+A Lexical Analyzer, also known as a lexer, is the first phase of a compiler or interpreter. Its primary function is to scan the source code and break it down into a sequence of meaningful components called tokens. Tokens are categorized as keywords, identifiers, operators, symbols, numbers, and whitespace. This process is known as lexical analysis.
+
+The lexical analyzer reads the input character by character and groups them into lexemes based on predefined rules or patterns. For instance, int, if, and return are recognized as keywords, while user-defined names like main or x are identified as identifiers. It also filters out whitespaces and comments, which are irrelevant to syntax and semantic analysis.
+
+By converting the raw code into tokens, the lexer simplifies the job of the next compiler phases (like parsing) and ensures that the syntax structure can be analyzed more efficiently. It also performs basic error checking, such as detecting invalid characters or malformed numbers.
+
+In summary, the lexical analyzer acts as a translator between raw code and structured tokens, forming the foundation for further compilation or interpretation of a program.
