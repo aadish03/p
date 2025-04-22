@@ -40,3 +40,9 @@ int main() {
 
     return 0;
 }
+Enter number of productions: 2
+Enter productions (e.g., E->Ea|b):
+E->Ea|b
+A->aA|c
+
+
