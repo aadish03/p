@@ -1,0 +1,78 @@
+We'll use the same example:
+
+Rain: Can be True or False
+
+Sprinkler: Can be True or False
+
+GrassWet: Depends on Rain and Sprinkler
+
+We'll manually define the prior and conditional probabilities, and compute queries using basic probability rules.
+
+🧠 Probability Table:
+P(Rain = True) = 0.3
+
+P(Sprinkler = True) = 0.4
+
+P(GrassWet | Rain, Sprinkler)
+
+
+Rain	Sprinkler	P(GrassWet=True)
+F	F	0.01
+F	T	0.2
+T	F	0.9
+T	T	0.99
+
+
+
+
+# Priors
+P_rain = {True: 0.3, False: 0.7}
+P_sprinkler = {True: 0.4, False: 0.6}
+
+# Conditional probability of GrassWet given Rain and Sprinkler
+P_grasswet_given = {
+    (False, False): {True: 0.01, False: 0.99},
+    (False, True):  {True: 0.2,  False: 0.8},
+    (True, False):  {True: 0.9,  False: 0.1},
+    (True, True):   {True: 0.99, False: 0.01},
+}
+
+# Joint Probability: P(Rain, Sprinkler, GrassWet)
+def joint_prob(rain, sprinkler, grasswet):
+    p_r = P_rain[rain]
+    p_s = P_sprinkler[sprinkler]
+    p_g = P_grasswet_given[(rain, sprinkler)][grasswet]
+    return p_r * p_s * p_g
+
+# Compute marginal: P(GrassWet=True)
+def compute_marginal_grasswet():
+    total = 0
+    for rain in [True, False]:
+        for sprinkler in [True, False]:
+            total += joint_prob(rain, sprinkler, True)
+    return total
+
+# Compute conditional: P(GrassWet=True | Rain=True)
+def compute_conditional_grasswet_given_rain():
+    numerator = 0
+    denominator = 0
+    rain = True
+    for sprinkler in [True, False]:
+        jp_true = joint_prob(rain, sprinkler, True)
+        jp_total = jp_true + joint_prob(rain, sprinkler, False)
+        numerator += jp_true
+        denominator += jp_total
+    return numerator / denominator
+
+# Results
+print("P(GrassWet=True):", round(compute_marginal_grasswet(), 4))
+print("P(GrassWet=True | Rain=True):", round(compute_conditional_grasswet_given_rain(), 4))
+
+
+
+
+
+
+
+P(GrassWet=True): 0.2619
+P(GrassWet=True | Rain=True): 0.45
