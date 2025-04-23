@@ -1,8 +1,6 @@
-assembler
-char-count 
-identifier 
-inttofloat
-leftrecursion
-lexical
-parser
-word-count
+dfs
+greedy-bfs
+hillclimb
+minmax
+bfs
+astar
