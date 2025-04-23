@@ -4,3 +4,4 @@ hillclimb
 minmax
 bfs
 astar
+alphabeta
