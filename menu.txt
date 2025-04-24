@@ -5,3 +5,4 @@ minmax
 bfs
 astar
 alphabeta
+bayesian
