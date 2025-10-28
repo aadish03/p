@@ -1,8 +1,2 @@
-dfs
-greedy-bfs
-hillclimb
-minmax
-bfs
-astar
-alphabeta
-bayesian
+r_viz
+wc_mapreduce

@@ -1,0 +1,43 @@
+# Load built-in dataset
+data(mtcars)
+
+# Show first few rows
+print("Dataset Preview:")
+print(head(mtcars))
+
+# --- 1️⃣ BAR PLOT ---
+# Bar plot of number of cylinders (categorical variable)
+png("barplot.png")   # Save to file
+barplot(table(mtcars$cyl),
+        main = "Bar Plot of Cylinder Counts",
+        xlab = "Number of Cylinders",
+        ylab = "Frequency",
+        col = c("skyblue", "lightgreen", "salmon"))
+dev.off()
+
+# --- 2️⃣ SCATTER PLOT ---
+# Scatter plot of mpg vs hp (Miles per gallon vs Horsepower)
+png("scatterplot.png")
+plot(mtcars$hp, mtcars$mpg,
+     main = "Scatter Plot: MPG vs Horsepower",
+     xlab = "Horsepower (hp)",
+     ylab = "Miles Per Gallon (mpg)",
+     pch = 19, col = "blue")
+dev.off()
+
+# --- 3️⃣ HISTOGRAM ---
+# Histogram of mpg (Miles per gallon)
+png("histogram.png")
+hist(mtcars$mpg,
+     main = "Histogram of Miles Per Gallon",
+     xlab = "Miles Per Gallon",
+     ylab = "Frequency",
+     col = "orange",
+     border = "brown")
+dev.off()
+
+print("✅ Plots saved: barplot.png, scatterplot.png, histogram.png")
+
+
+#run
+Rscript file.R
