@@ -1,2 +1,4 @@
 r_viz
 wc_mapreduce
+mongo
+flajolet
