@@ -1,2 +1,9 @@
-r_viz
-wc_mapreduce
+confusion
+dbscan
+decision 
+ensemble(random forest)
+graph
+linear
+logistic
+pca
+svm
