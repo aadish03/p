@@ -1,0 +1,89 @@
+# Import libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+
+# ---------------------------------------------------------------
+# 🧩 Load Iris dataset and reduce to 2 classes and 2 features
+# ---------------------------------------------------------------
+iris = datasets.load_iris()
+X = iris.data[iris.target != 2, :2]   # only first 2 features (sepal length, sepal width)
+y = iris.target[iris.target != 2]     # only classes 0 and 1
+
+# Scale features (important for SVM)
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Train SVM with linear kernel
+clf = SVC(kernel='linear')
+clf.fit(X, y)
+
+# ---------------------------------------------------------------
+# 🧮 Plotting the hyperplane
+# ---------------------------------------------------------------
+# Create a grid for plotting
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200),
+                     np.linspace(y_min, y_max, 200))
+
+# Decision function
+Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+# Plot data points
+plt.figure(figsize=(8, 6))
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm', s=40, edgecolors='k')
+
+# Plot the hyperplane and margins
+plt.contour(xx, yy, Z, levels=[0], linewidths=2, colors='black')       # main hyperplane
+plt.contour(xx, yy, Z, levels=[-1, 1], linestyles=['--', '--'], colors='gray')  # margins
+
+# Highlight support vectors
+plt.scatter(clf.support_vectors_[:, 0], clf.support_vectors_[:, 1],
+            s=120, facecolors='none', edgecolors='black', label='Support Vectors')
+
+# Labels and title
+plt.title("SVM on Iris Dataset (Single Hyperplane)")
+plt.xlabel("Sepal Length (standardized)")
+plt.ylabel("Sepal Width (standardized)")
+plt.legend()
+plt.show()
+
+# ---------------------------------------------------------------
+# 🧠 (COMMENTED) — Custom Dummy Dataset Generator (optional)
+# ---------------------------------------------------------------
+"""
+def generate_linear_separable_data(n_samples=100, seed=42):
+    '''
+    Generates two linearly separable clusters for SVM visualization.
+    '''
+    np.random.seed(seed)
+    X_class0 = np.random.randn(n_samples//2, 2) + np.array([-2, -2])
+    X_class1 = np.random.randn(n_samples//2, 2) + np.array([2, 2])
+    X = np.vstack((X_class0, X_class1))
+    y = np.array([0]*(n_samples//2) + [1]*(n_samples//2))
+    return X, y
+
+# Example usage:
+# X, y = generate_linear_separable_data()
+# clf = SVC(kernel='linear').fit(X, y)
+# Plot same as above to see a single hyperplane
+"""
+""" 
+SVM theory - Support Vector Machine (SVM) is a supervised learning
+algorithm used for both classification and regression tasks, but 
+it is primarily popular for classification. The main idea behind 
+SVM is to find the optimal hyperplane that best separates data 
+points of different classes in a high-dimensional space. This 
+hyperplane is chosen such that it maximizes the margin, i.e., 
+the distance between the hyperplane and the nearest data points 
+from each class, called support vectors. By maximizing this margin, 
+SVM aims to improve the model’s generalization ability. For non-linearly 
+separable data, SVM uses kernel functions (like polynomial, radial basis 
+function (RBF), or sigmoid kernels) to project data into a higher-dimensional 
+space where it becomes linearly separable. SVMs are effective for high-dimensional 
+datasets but can be computationally intensive on very large datasets.
+"""

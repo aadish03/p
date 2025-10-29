@@ -1,0 +1,107 @@
+# Decision Tree (classification) — scikit-learn example
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# ---------------------------
+# OPTION 1: Use sklearn generator
+# ---------------------------
+X, y = make_classification(
+    n_samples=300,
+    n_features=2,         # keep 2 features so we can visualize decision boundary
+    n_redundant=0,
+    n_informative=2,
+    n_clusters_per_class=1,
+    flip_y=0.03,
+    class_sep=1.2,
+    random_state=42
+)
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train Decision Tree
+clf = DecisionTreeClassifier(max_depth=4, random_state=42)
+clf.fit(X_train, y_train)
+
+# Predict & evaluate
+y_pred = clf.predict(X_test)
+print("Accuracy:", f"{accuracy_score(y_test, y_pred):.3f}")
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+# ---------------------------
+# Visualization: Decision boundary (2D) + test points
+# ---------------------------
+def plot_decision_boundary(model, X, y, title="Decision Boundary", resolution=200):
+    x_min, x_max = X[:,0].min()-1, X[:,0].max()+1
+    y_min, y_max = X[:,1].min()-1, X[:,1].max()+1
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, resolution),
+                         np.linspace(y_min, y_max, resolution))
+    grid = np.c_[xx.ravel(), yy.ravel()]
+    preds = model.predict(grid).reshape(xx.shape)
+    plt.figure(figsize=(8,6))
+    plt.contourf(xx, yy, preds, alpha=0.25)
+    plt.scatter(X[:,0], X[:,1], c=y, edgecolors='k', s=40)
+    plt.title(title)
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.show()
+
+plot_decision_boundary(clf, X_test, y_test, title="Decision Tree Decision Boundary (test set)")
+
+# ---------------------------
+# Visualization: Plot the tree structure
+# ---------------------------
+plt.figure(figsize=(14,6))
+plot_tree(clf, filled=True, feature_names=["f1","f2"], class_names=["class0","class1"], rounded=True, fontsize=10)
+plt.title("Decision Tree Structure")
+plt.show()
+
+# ---------------------------
+# OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator (similar features)
+# ---------------------------
+"""
+def generate_dummy_classification_tree(n_samples=300, seed=42, spread=1.0, shift=3.5):
+    '''
+    Generates a 2-feature binary dataset with two Gaussian clusters (similar to make_classification).
+    - n_samples: total samples (should be even for balanced classes)
+    - spread: controls cluster variance
+    - shift: how far apart the class centers are
+    Returns: X (n_samples,2), y (n_samples,)
+    '''
+    np.random.seed(seed)
+    half = n_samples // 2
+    # class 0 centered near (0,0), class 1 centered near (shift, shift)
+    X0 = np.random.randn(half, 2) * spread + np.array([0.0, 0.0])
+    X1 = np.random.randn(half, 2) * spread + np.array([shift, shift])
+    X = np.vstack((X0, X1))
+    y = np.array([0]*half + [1]*half)
+    # shuffle
+    perm = np.random.permutation(n_samples)
+    return X[perm], y[perm]
+
+# Example usage:
+# X, y = generate_dummy_classification_tree()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# clf = DecisionTreeClassifier(max_depth=4).fit(X_train, y_train)
+# y_pred = clf.predict(X_test)
+"""
+
+"""
+Decision Tree is a supervised learning algorithm 
+used for both classification and regression tasks. 
+It works by recursively splitting the data into subsets 
+based on the features that maximize the information gain. 
+The tree is built by selecting the best feature at each 
+node to split the data into two subsets that are as 
+pure as possible (i.e., have the same class labels). 
+The tree is then used to predict the class label for 
+new data points. Decision Trees are easy to understand 
+and interpret, and they can handle both categorical and 
+continuous features. However, they can be prone to overfitting 
+and may not generalize well to new data.
+"""

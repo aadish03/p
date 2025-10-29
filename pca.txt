@@ -1,0 +1,85 @@
+# Principal Component Analysis (PCA) Example
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# ---------------------------------------------------------------
+# 🧩 OPTION 1: Using Scikit-Learn's built-in dataset generator
+# ---------------------------------------------------------------
+
+# Generate a high-dimensional dataset (4 features → reduce to 2)
+X, y = make_classification(
+    n_samples=200,
+    n_features=4,         # we'll reduce from 4D → 2D
+    n_informative=3,
+    n_redundant=1,
+    n_clusters_per_class=1,
+    random_state=42
+)
+
+# Standardize data before PCA
+X_scaled = StandardScaler().fit_transform(X)
+
+# Apply PCA to reduce to 2D
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Print explained variance ratio
+print("Explained Variance Ratio:", pca.explained_variance_ratio_)
+print(f"Total Variance Retained: {sum(pca.explained_variance_ratio_)*100:.2f}%")
+
+# ---------------------------------------------------------------
+# 🧮 Visualization of PCA result
+# ---------------------------------------------------------------
+plt.figure(figsize=(8,6))
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='coolwarm', edgecolors='k')
+plt.title("PCA Projection (4D → 2D)")
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.grid(True)
+plt.show()
+
+# ---------------------------------------------------------------
+# 🧠 OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator
+# ---------------------------------------------------------------
+"""
+def generate_dummy_pca_data(n_samples=200, n_features=4, seed=42):
+    '''
+    Generates a synthetic dataset with correlated features for PCA demonstration.
+    '''
+    np.random.seed(seed)
+    # Generate correlated features
+    base = np.random.rand(n_samples, 1) * 10
+    X = np.hstack([
+        base + np.random.randn(n_samples, 1) * 0.5,  # correlated feature 1
+        base * 0.8 + np.random.randn(n_samples, 1) * 0.5,  # correlated feature 2
+        base * 1.2 + np.random.randn(n_samples, 1) * 0.5,  # correlated feature 3
+        np.random.rand(n_samples, 1) * 10  # independent feature
+    ])
+    y = (base.flatten() > 5).astype(int)  # binary label
+    return X, y
+
+# Example usage:
+# X, y = generate_dummy_pca_data()
+# X_scaled = StandardScaler().fit_transform(X)
+# pca = PCA(n_components=2)
+# X_pca = pca.fit_transform(X_scaled)
+# plt.scatter(X_pca[:,0], X_pca[:,1], c=y, cmap='coolwarm')
+# plt.show()
+"""
+"""
+Principal Component Analysis (PCA) is a dimensionality 
+reduction technique that transforms high-dimensional 
+data into a lower-dimensional space while preserving as 
+much variance as possible. It works by identifying new 
+uncorrelated variables, called principal components, 
+which are linear combinations of the original features. 
+The first component captures the highest variance, the 
+second captures the next highest, and so on. PCA helps 
+simplify data visualization, remove noise, and improve 
+computational efficiency in machine learning pipelines, 
+especially before applying algorithms sensitive to 
+feature correlations.
+"""

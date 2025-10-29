@@ -1,0 +1,115 @@
+# Import necessary libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+
+# ---------------------------------------------------------------
+# 🧩 OPTION 1: Using Scikit-Learn's built-in dataset generator
+# ---------------------------------------------------------------
+
+# Generate dummy classification dataset
+X, y = make_classification(
+    n_samples=300,
+    n_features=2,         # 2 features for easy visualization
+    n_informative=2,
+    n_redundant=0,
+    n_clusters_per_class=1,
+    flip_y=0.03,
+    class_sep=1.5,
+    random_state=42
+)
+
+# Split into training and testing data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train Random Forest Classifier
+rf = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
+rf.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = rf.predict(X_test)
+print("✅ Model Evaluation:")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+# ---------------------------------------------------------------
+# 📊 Plot Confusion Matrix
+# ---------------------------------------------------------------
+disp = ConfusionMatrixDisplay(confusion_matrix(y_test, y_pred), display_labels=rf.classes_)
+disp.plot(cmap='Greens', values_format='d')
+plt.title("Random Forest Confusion Matrix")
+plt.show()
+
+# ---------------------------------------------------------------
+# 🌳 Visualization: Decision Boundary (2D)
+# ---------------------------------------------------------------
+def plot_decision_boundary(model, X, y, title="Decision Boundary", resolution=200):
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, resolution),
+                         np.linspace(y_min, y_max, resolution))
+    grid = np.c_[xx.ravel(), yy.ravel()]
+    preds = model.predict(grid).reshape(xx.shape)
+    plt.figure(figsize=(8, 6))
+    plt.contourf(xx, yy, preds, alpha=0.25)
+    plt.scatter(X[:, 0], X[:, 1], c=y, edgecolors='k', s=40)
+    plt.title(title)
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.show()
+
+plot_decision_boundary(rf, X_test, y_test, title="Random Forest Decision Boundary (Test Set)")
+
+# ---------------------------------------------------------------
+# 🧠 OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator
+# ---------------------------------------------------------------
+"""
+def generate_dummy_random_forest_data(n_samples=300, seed=42, class_sep=2.0, noise=0.05):
+    '''
+    Generates a simple binary dataset with two Gaussian clusters.
+    Mimics make_classification behavior for Random Forests.
+    '''
+    np.random.seed(seed)
+    half = n_samples // 2
+    X0 = np.random.randn(half, 2) + np.array([0, 0])
+    X1 = np.random.randn(half, 2) + np.array([class_sep, class_sep])
+    X = np.vstack((X0, X1))
+    y = np.array([0]*half + [1]*half)
+
+    # Add label noise
+    flip_mask = np.random.rand(n_samples) < noise
+    y[flip_mask] = 1 - y[flip_mask]
+
+    # Shuffle dataset
+    perm = np.random.permutation(n_samples)
+    return X[perm], y[perm]
+
+# Example usage:
+# X, y = generate_dummy_random_forest_data()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+# rf = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42).fit(X_train, y_train)
+# y_pred = rf.predict(X_test)
+# ConfusionMatrixDisplay(confusion_matrix(y_test, y_pred)).plot()
+# plt.show()
+"""
+
+
+"""
+Random Forest – Random Forest is an ensemble learning 
+algorithm that combines multiple decision trees to improve 
+prediction accuracy and reduce overfitting. Each tree in the 
+forest is trained on a random subset of the training data 
+(using a technique called bootstrap sampling) and uses a random 
+subset of features for splitting nodes. This randomness ensures 
+that the trees are diverse and not correlated. For classification, 
+the Random Forest takes a majority vote among the trees, while for 
+regression, it takes the average of their outputs. Because it aggregates 
+the results of many independent trees, Random Forest is robust to noise, 
+handles missing values well, and maintains strong performance even without 
+extensive hyperparameter tuning. However, it can be slower and less 
+interpretable compared to a single decision tree.
+"""

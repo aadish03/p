@@ -1,0 +1,90 @@
+# Import necessary libraries
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import numpy as np
+
+# ---------------------------------------------------------------
+# 🧩 OPTION 1: Using Scikit-Learn's built-in dataset generator
+# ---------------------------------------------------------------
+
+# Generate a dummy binary classification dataset
+X, y = make_classification(
+    n_samples=200,     # number of samples
+    n_features=2,      # 2 features for visualization
+    n_informative=2,   # both features are informative
+    n_redundant=0,     # no redundant features
+    n_clusters_per_class=1,
+    flip_y=0.03,       # random label noise
+    random_state=42
+)
+
+# Split into training and test data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Create and train the Logistic Regression model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Predict on test data
+y_pred = model.predict(X_test)
+
+# Evaluate model performance
+print("✅ Model Evaluation:")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+# ---------------------------------------------------------------
+# 🧮 Visualization (only works well with 2 features)
+# ---------------------------------------------------------------
+plt.figure(figsize=(8,6))
+plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred, cmap='coolwarm', edgecolors='k')
+plt.title('Logistic Regression Classification Results')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.show()
+
+# ---------------------------------------------------------------
+# 🧠 OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator
+# ---------------------------------------------------------------
+"""
+def generate_dummy_classification(n_samples=200, seed=42):
+    '''
+    Generates a simple binary classification dataset.
+    Each class roughly follows a Gaussian distribution.
+    '''
+    np.random.seed(seed)
+    # Class 0 centered around (2, 2), Class 1 around (6, 6)
+    X_class0 = np.random.randn(n_samples//2, 2) + np.array([2, 2])
+    X_class1 = np.random.randn(n_samples//2, 2) + np.array([6, 6])
+
+    X = np.vstack((X_class0, X_class1))
+    y = np.array([0]*(n_samples//2) + [1]*(n_samples//2))
+
+    # Add slight random shuffle
+    shuffle_idx = np.random.permutation(n_samples)
+    X, y = X[shuffle_idx], y[shuffle_idx]
+    return X, y
+
+# Example usage of the above function:
+# X, y = generate_dummy_classification()
+# model = LogisticRegression().fit(X, y)
+# y_pred = model.predict(X)
+"""
+
+"""
+Logistic Regression is a classification algorithm 
+used to predict categorical outcomes, often binary 
+(e.g., yes/no, spam/not spam). Instead of fitting a 
+straight line, it models the probability that a data 
+point belongs to a particular class using the logistic 
+(sigmoid) function, which maps values into the range 
+[0, 1]. The output probability is then thresholded 
+(commonly at 0.5) to assign class labels. Logistic 
+Regression is widely used because it’s easy to implement, 
+interpretable, and performs well on linearly separable 
+classification problems.
+"""

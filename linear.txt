@@ -1,0 +1,73 @@
+# Import necessary libraries
+from sklearn.datasets import make_regression
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+import numpy as np
+
+# ---------------------------------------------------------------
+# 🧩 OPTION 1: Using Scikit-Learn's built-in dataset generator
+# ---------------------------------------------------------------
+
+# Generate dummy regression data
+X, y = make_regression(
+    n_samples=100,    # number of data points
+    n_features=1,     # single feature for simple linear regression
+    noise=15,         # adds random variation
+    random_state=42   # ensures reproducibility
+)
+
+# Create and train the linear regression model
+model = LinearRegression()
+model.fit(X, y)
+
+# Make predictions
+y_pred = model.predict(X)
+
+# Display model parameters
+print(f"Slope (Coefficient): {model.coef_[0]:.2f}")
+print(f"Intercept: {model.intercept_:.2f}")
+
+# Plot actual data and regression line
+plt.scatter(X, y, color='blue', label='Actual Data')
+plt.plot(X, y_pred, color='red', linewidth=2, label='Regression Line')
+plt.title('Linear Regression using Scikit-Learn')
+plt.xlabel('Feature (X)')
+plt.ylabel('Target (y)')
+plt.legend()
+plt.show()
+
+# ---------------------------------------------------------------
+# 🧠 OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator
+# ---------------------------------------------------------------
+"""
+def generate_dummy_data(n_samples=100, slope=25.0, intercept=10.0, noise=15.0, seed=42):
+    '''
+    Generates dummy linear regression data similar to sklearn.datasets.make_regression
+
+    Formula: y = slope * X + intercept + random noise
+    '''
+    np.random.seed(seed)
+    X = np.random.rand(n_samples, 1) * 10         # random values between 0 and 10
+    noise_term = np.random.randn(n_samples) * noise
+    y = slope * X.flatten() + intercept + noise_term
+    return X, y
+
+# Example usage of the above function:
+# X, y = generate_dummy_data()
+# model = LinearRegression().fit(X, y)
+# y_pred = model.predict(X)
+"""
+
+"""
+Linear Regression is a statistical method used to model 
+the relationship between a dependent variable and one or 
+more independent variables. It assumes a linear relationship 
+between the features and the target variable, expressed by 
+the equation: y = mx + b, where y is the target variable, 
+x is the independent variable, m is the slope (coefficient), 
+and b is the intercept. Linear Regression is widely used in 
+predictive modeling, time series analysis, and financial 
+forecasting because of its simplicity and interpretability. 
+However, it can be sensitive to outliers and assumes linearity, 
+which may not hold in all cases.
+"""

@@ -1,0 +1,98 @@
+# Import libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
+from sklearn.linear_model import LogisticRegression
+
+# ---------------------------------------------------------------
+# 🧩 OPTION 1: Using Scikit-Learn's built-in dataset generator
+# ---------------------------------------------------------------
+
+# Generate dummy classification dataset
+X, y = make_classification(
+    n_samples=200,      # total samples
+    n_features=2,       # 2 features for easy visualization
+    n_informative=2,    # both features useful
+    n_redundant=0,      # no redundant features
+    n_clusters_per_class=1,
+    flip_y=0.03,        # label noise
+    random_state=42
+)
+
+# Split into train/test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train a Logistic Regression model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# ---------------------------------------------------------------
+# 🧮 Compute and Display Confusion Matrix
+# ---------------------------------------------------------------
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:\n", cm)
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Plot Confusion Matrix
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
+disp.plot(cmap='Purples', values_format='d')
+plt.title("Confusion Matrix Visualization")
+plt.xlabel("Fruit Prediction", fontsize=12)
+plt.ylabel("Actual Fruit", fontsize=12)
+plt.show()
+
+# ---------------------------------------------------------------
+# 🧠 OPTION 2: (COMMENTED) — Custom Dummy Dataset Generator
+# ---------------------------------------------------------------
+"""
+def generate_dummy_confusion_data(n_samples=200, seed=42, class_sep=3.0, noise=0.3):
+    '''
+    Generates a simple binary classification dataset for confusion matrix visualization.
+    Each class is a Gaussian cluster.
+    '''
+    np.random.seed(seed)
+    half = n_samples // 2
+
+    # Class 0 centered near (0,0), Class 1 near (class_sep, class_sep)
+    X_class0 = np.random.randn(half, 2) + np.array([0, 0])
+    X_class1 = np.random.randn(half, 2) + np.array([class_sep, class_sep])
+
+    X = np.vstack((X_class0, X_class1))
+    y = np.array([0]*half + [1]*half)
+
+    # Flip a few labels for realism
+    flip_mask = np.random.rand(n_samples) < noise
+    y[flip_mask] = 1 - y[flip_mask]
+
+    # Shuffle dataset
+    shuffle_idx = np.random.permutation(n_samples)
+    return X[shuffle_idx], y[shuffle_idx]
+
+# Example usage:
+# X, y = generate_dummy_confusion_data()
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+# model = LogisticRegression().fit(X_train, y_train)
+# y_pred = model.predict(X_test)
+# cm = confusion_matrix(y_test, y_pred)
+# ConfusionMatrixDisplay(confusion_matrix=cm).plot()
+# plt.show()
+"""
+
+"""
+Confusion Matrix is a table that summarizes the performance 
+of a classification model by showing the number of true 
+positives, true negatives, false positives, and false 
+negatives. It is a useful tool for evaluating the accuracy 
+of a model and identifying common errors. The matrix is 
+organized in four quadrants: True Positives (TP), True 
+Negatives (TN), False Positives (FP), and False Negatives 
+(FN). The main diagonal (TP and TN) shows correct predictions, 
+while off-diagonal elements (FP and FN) represent errors. 
+The confusion matrix helps in understanding model behavior, 
+identifying class imbalances, and tuning classification thresholds.
+"""
