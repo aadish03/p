@@ -4,18 +4,16 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("social.csv")
 
 # total engagement per platform
-grouped = df.groupby("Platform")[["Likes","Shares","Comments"]].sum()
+grouped = df.groupby("Platform")[["Likes", "Shares", "Comments"]].sum()
 
+# 1. Bar Chart
 grouped.plot(kind="bar")
 plt.title("Social Media Engagement")
+plt.xlabel("Platform")
+plt.ylabel("Count")
 plt.show()
 
-Data Visualization (Practical):
-This program analyzes social media engagement using pandas and matplotlib.
-It first shows a bar chart for likes, shares, and comments by platform.
-Then it displays a pie chart to show each platform's contribution to total engagement.
-
-# total engagement split by platform
+# 2. Pie Chart (total engagement share)
 platform_totals = grouped.sum(axis=1)
 
 plt.figure()
@@ -25,4 +23,18 @@ platform_totals.plot(
     ylabel="",
     title="Platform Share of Total Engagement",
 )
+plt.show()
+
+# 3. Stacked Bar Chart (composition of engagement)
+grouped.plot(kind="bar", stacked=True)
+plt.title("Engagement Breakdown by Platform")
+plt.xlabel("Platform")
+plt.ylabel("Total Engagement")
+plt.show()
+
+# 4. Line Chart (trend of engagement types)
+grouped.T.plot(kind="line", marker='o')
+plt.title("Engagement Type Comparison Across Platforms")
+plt.xlabel("Engagement Type")
+plt.ylabel("Count")
 plt.show()
